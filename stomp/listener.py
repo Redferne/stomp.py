@@ -369,7 +369,7 @@ class StatsListener(ConnectionListener):
 
         :param (str,int) host_and_port: the host and port as a tuple
         """
-        log.info("connecting %s %s (x %s)", host_and_port[0], host_and_port[1], self.connections)
+        log.info("connecting %s (x %s)", host_and_port[0], self.connections)
         self.connections += 1
 
     def on_message(self, headers, body):

@@ -42,8 +42,8 @@ import stomp.listener
 import stomp.utils as utils
 
 
-log = logging.getLogger('stomp.py')
-
+#log = logging.getLogger('stomp.py')
+log = logging.getLogger(__name__)
 
 class BaseTransport(stomp.listener.Publisher):
     """
@@ -264,7 +264,7 @@ class BaseTransport(stomp.listener.Publisher):
         if log.isEnabledFor(logging.DEBUG):
             log.debug("Sending frame: %s", lines)
         else:
-            log.info("Sending frame: %r, headers=%r", frame.cmd or "heartbeat", utils.clean_headers(frame.headers))
+            log.info("Sending frame: %r, headers=%r", frame.cmd or "heartbeat", frame.headers)
 
         self.send(encode(packed_frame))
 
@@ -336,7 +336,9 @@ class BaseTransport(stomp.listener.Publisher):
                                 f.body = decode(f.body)
                             self.process_frame(f, frame)
                 except exception.ConnectionClosedException:
+                    log.error("__receiver_loop CCE!")
                     if self.running:
+                        self.notify('disconnected')
                         #
                         # Clear out any half-received messages after losing connection
                         #
@@ -350,7 +352,7 @@ class BaseTransport(stomp.listener.Publisher):
             with self.__receiver_thread_exit_condition:
                 self.__receiver_thread_exited = True
                 self.__receiver_thread_exit_condition.notifyAll()
-            log.info("Receiver loop ended")
+            log.error("Receiver loop ended")
             self.notify('receiver_loop_completed')
             with self.__connect_wait_condition:
                 self.__connect_wait_condition.notifyAll()
@@ -566,7 +568,10 @@ class Transport(BaseTransport):
         :rtype: bool
         """
         try:
-            return self.socket is not None and self.socket.getsockname()[1] != 0 and BaseTransport.is_connected(self)
+            if self.socket is None:
+                return True
+            return self.socket.getsockname()[1] != 0 and BaseTransport.is_connected(self)
+            #return self.socket is not None and self.socket.getsockname()[1] != 0 and BaseTransport.is_connected(self)
         except socket.error:
             return False
 
@@ -635,7 +640,7 @@ class Transport(BaseTransport):
         except socket.error:
             _, e, _ = sys.exc_info()
             if get_errno(e) in (errno.EAGAIN, errno.EINTR):
-                log.debug("socket read interrupted, restarting")
+                log.error("socket read interrupted, restarting")
                 raise exception.InterruptedException()
             if self.is_connected():
                 raise

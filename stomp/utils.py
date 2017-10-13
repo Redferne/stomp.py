@@ -213,7 +213,8 @@ def convert_frame_to_lines(frame):
     if frame.cmd:
         lines.append(frame.cmd)
         lines.append("\n")
-    for key, vals in sorted(frame.headers.items()):
+#    for key, vals in sorted(frame.headers.items()):
+    for key, vals in frame.headers.items():
         if vals is None:
             continue
         if type(vals) != tuple:

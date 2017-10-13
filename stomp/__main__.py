@@ -11,6 +11,7 @@ import sys
 import time
 
 from stomp.adapter.multicast import MulticastConnection
+from stomp.adapter.websocket import WebsocketConnection
 import stomp.colors
 from stomp.connect import StompConnection10, StompConnection11, StompConnection12
 from stomp.listener import ConnectionListener, StatsListener

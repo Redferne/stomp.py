@@ -475,7 +475,7 @@ class Protocol12(Protocol11):
             headers[HDR_TRANSACTION] = transaction
         self.send_frame(CMD_NACK, headers)
 
-    def connect(self, username=None, passcode=None, wait=False, headers=None, **keyword_headers):
+    def connect(self, username=None, passcode=None, wait=False, timeout=None, headers=None, **keyword_headers):
         """
         Send a STOMP CONNECT frame. Differs from 1.0 and 1.1 versions in that the HOST header is enforced.
 
@@ -485,7 +485,8 @@ class Protocol12(Protocol11):
         :param dict headers: a map of any additional headers to send with the subscription
         :param keyword_headers: any additional headers to send with the subscription
         """
-        cmd = CMD_STOMP
+#        cmd = CMD_STOMP
+        cmd = CMD_CONNECT
         headers = utils.merge_headers([headers, keyword_headers])
         headers[HDR_ACCEPT_VERSION] = self.version
         headers[HDR_HOST] = self.transport.current_host_and_port[0]
@@ -502,6 +503,6 @@ class Protocol12(Protocol11):
         self.send_frame(cmd, headers)
 
         if wait:
-            self.transport.wait_for_connection()
+            self.transport.wait_for_connection(timeout=timeout)
             if self.transport.connection_error:
                 raise ConnectFailedException()
