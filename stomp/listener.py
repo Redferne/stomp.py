@@ -12,8 +12,8 @@ import stomp.exception as exception
 import stomp.utils as utils
 
 
-log = logging.getLogger('stomp.py')
-
+#log = logging.getLogger('stomp.py')
+log = logging.getLogger(__name__)
 
 class Publisher(object):
     """
@@ -186,6 +186,7 @@ class HeartbeatListener(ConnectionListener):
                         getattr(self.heartbeat_thread, "name", "Thread")
 
     def on_disconnected(self):
+        log.error("listener on_disconnected")
         self.running = False
 
     def on_message(self, headers, body):

@@ -115,9 +115,11 @@ class BaseTransport(stomp.listener.Publisher):
         Stop the connection. Performs a clean shutdown by waiting for the
         receiver thread to exit.
         """
+        log.error("transport stop!")
         with self.__receiver_thread_exit_condition:
             while not self.__receiver_thread_exited:
                 self.__receiver_thread_exit_condition.wait()
+        self.notify('disconnected')
 
     def is_connected(self):
         """
@@ -338,7 +340,6 @@ class BaseTransport(stomp.listener.Publisher):
                 except exception.ConnectionClosedException:
                     log.error("__receiver_loop CCE!")
                     if self.running:
-                        self.notify('disconnected')
                         #
                         # Clear out any half-received messages after losing connection
                         #
@@ -350,10 +351,12 @@ class BaseTransport(stomp.listener.Publisher):
                     self.cleanup()
         finally:
             with self.__receiver_thread_exit_condition:
+                log.error("exit_condition true!")
                 self.__receiver_thread_exited = True
                 self.__receiver_thread_exit_condition.notifyAll()
             log.error("Receiver loop ended")
             self.notify('receiver_loop_completed')
+            self.notify('disconnected')
             with self.__connect_wait_condition:
                 self.__connect_wait_condition.notifyAll()
 
@@ -580,6 +583,7 @@ class Transport(BaseTransport):
         Disconnect the underlying socket connection
         """
         self.running = False
+        log.error("Disconnect_socket!")
         if self.socket is not None:
             if self.__need_ssl():
                 #

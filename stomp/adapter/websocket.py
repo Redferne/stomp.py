@@ -72,9 +72,9 @@ class WebsocketTransport(Transport):
 
         while True:
             try:
-                _LOGGER.error("websocket: rx")
+                _LOGGER.debug("websocket: rx")
                 data = self.ws.recv()
-                _LOGGER.error("websocket: rxed")
+                _LOGGER.debug("websocket: rxed")
                 if type(data) == str:
                     return str.encode(data)
                 return data
@@ -152,6 +152,7 @@ class WebsocketTransport(Transport):
         log.debug("Received frame: %r, headers=%r, body=%r", f.cmd, f.headers, f.body)
 
     def stop(self):
+        log.error("websocket stop!")
         self.running = False
         self.ws.close()
         Transport.stop(self)
@@ -204,6 +205,7 @@ class WebsocketConnection(BaseConnection, Protocol12):
         :param dict headers:
         :param keyword_headers:
         """
+        log.error("websocket->disconnect")
         Protocol12.disconnect(self, receipt, headers, **keyword_headers)
         self.transport.stop()
 
